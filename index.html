@@ -1,0 +1,600 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BVC Spends Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+:root{
+  color-scheme:light;
+  --bg:#F4F5F8; --surface:#FFFFFF; --surface-2:#F4F5F8; --line:#DDE0E8; --line-strong:#BFC4D2;
+  --text:#000000; --muted:#3D4454; --faint:#6E7587;
+  --blue:#1B3F9B; --blue-ink:#FFFFFF; --blue-soft:#E7EDFB;
+  --gold:#C9A227; --gold-soft:#FBF3D9;
+  --good:#1E8E5A; --good-soft:#DFF3E8; --bad:#C6423E; --bad-soft:#FBE4E3; --warn-soft:#FFF1D6; --warn:#8A5A00;
+  --font-ui:"Poppins","Segoe UI",system-ui,sans-serif;
+  --font-body:"Source Sans 3","Segoe UI",system-ui,sans-serif;
+  --radius:10px; --shadow:0 10px 30px rgba(0,0,0,.14);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0F1424; --surface:#171D30; --surface-2:#1F2640; --line:#2B3350; --line-strong:#3C4566;
+    --text:#F2F4F8; --muted:#C3C8D6; --faint:#8E96AC;
+    --blue:#5F80E0; --blue-ink:#0B1020; --blue-soft:#1E2A52;
+    --gold:#D9B23A; --gold-soft:#3A2F0E;
+    --good:#3FBF86; --good-soft:#12352A; --bad:#E66767; --bad-soft:#3F1C1C; --warn-soft:#3A2B10; --warn:#E0A03A;
+    --shadow:0 10px 30px rgba(0,0,0,.5);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0F1424; --surface:#171D30; --surface-2:#1F2640; --line:#2B3350; --line-strong:#3C4566;
+  --text:#F2F4F8; --muted:#C3C8D6; --faint:#8E96AC;
+  --blue:#5F80E0; --blue-ink:#0B1020; --blue-soft:#1E2A52;
+  --gold:#D9B23A; --gold-soft:#3A2F0E;
+  --good:#3FBF86; --good-soft:#12352A; --bad:#E66767; --bad-soft:#3F1C1C; --warn-soft:#3A2B10; --warn:#E0A03A;
+  --shadow:0 10px 30px rgba(0,0,0,.5);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:15px;line-height:1.4;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+h1,h2,h3{font-family:var(--font-ui);margin:0}
+.num{font-variant-numeric:tabular-nums}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+
+.app{display:grid;grid-template-columns:232px 1fr;min-height:100%}
+@media (max-width:820px){.app{grid-template-columns:1fr}}
+
+/* sidebar */
+.side{background:var(--surface);border-right:1px solid var(--line);padding:16px 14px;display:flex;flex-direction:column;gap:18px;position:sticky;top:env(safe-area-inset-top,0px);height:100vh;overflow:auto}
+@media (max-width:820px){.side{position:static;height:auto;border-right:none;border-bottom:1px solid var(--line);gap:12px}}
+.brand{display:flex;gap:10px;align-items:center}
+.mark{width:34px;height:34px;border-radius:8px;background:var(--blue);color:var(--blue-ink);display:grid;place-items:center;font-family:var(--font-ui);font-weight:700;font-size:11.5px;position:relative;flex:none}
+.mark::after{content:"";position:absolute;right:-3px;bottom:-3px;width:10px;height:10px;border-radius:50%;background:var(--gold);border:2px solid var(--surface)}
+.brand h1{font-size:15.5px;font-weight:700;line-height:1.1}
+.brand p{margin:0;color:var(--faint);font-size:12px}
+.side-h{font-family:var(--font-ui);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--faint);font-weight:600;margin-bottom:6px}
+.nav{display:grid;gap:2px}
+.nav button{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;text-align:left;background:none;border:none;padding:8px 10px;border-radius:8px;cursor:pointer;color:var(--muted);font-size:14px}
+.nav button:hover{background:var(--surface-2)}
+.nav button.on{background:var(--blue-soft);color:var(--blue);font-weight:600}
+.nav button .amt{font-size:12.5px;color:var(--faint);font-variant-numeric:tabular-nums;white-space:nowrap;margin-left:auto;display:inline-flex;gap:6px;align-items:center}
+.nav button{flex-wrap:wrap}
+td.cat small{white-space:nowrap}
+.nav button.on .amt{color:var(--blue)}
+.side-foot{margin-top:auto;font-size:12px;color:var(--faint);display:flex;align-items:center;gap:6px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--good);flex:none}
+.dot.off{background:var(--faint)}
+@media (max-width:820px){.side-foot{margin-top:0}.nav.cats{display:none}}
+
+/* main */
+.main{padding:22px 26px 60px;min-width:0}
+@media (max-width:820px){.main{padding:16px}}
+.head{display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap}
+.head h2{font-size:24px;font-weight:700;line-height:1.1}
+.head p{margin:4px 0 0;color:var(--faint);font-size:13.5px}
+.head-r{margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.search{background:var(--surface);border:1px solid var(--line-strong);border-radius:8px;padding:8px 12px;min-width:220px}
+.btn{background:var(--surface);border:1px solid var(--line-strong);border-radius:8px;padding:8px 14px;cursor:pointer;font-family:var(--font-ui);font-size:13.5px;font-weight:500;white-space:nowrap}
+.btn:hover{background:var(--surface-2)}
+.btn.primary{background:var(--blue);color:var(--blue-ink);border-color:var(--blue)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.danger{color:var(--bad)}
+.btn.sm{padding:4px 9px;font-size:12.5px}
+.btn:disabled{opacity:.5;cursor:default}
+.banner{margin-top:14px;padding:9px 12px;border-radius:8px;font-size:13.5px;background:var(--warn-soft);color:var(--warn);border:1px solid color-mix(in srgb,var(--warn) 30%,transparent)}
+.banner[hidden]{display:none}
+
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}
+@media (max-width:640px){.tiles{grid-template-columns:1fr}}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
+.tile .l{font-family:var(--font-ui);font-size:12px;color:var(--faint);font-weight:500}
+.tile .v{font-family:var(--font-ui);font-size:26px;font-weight:600;margin-top:2px;line-height:1.1}
+.tile .v.txt{font-size:19px;line-height:1.2;overflow-wrap:anywhere}
+.tile .s{font-size:12.5px;color:var(--faint);margin-top:4px}
+
+/* form */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);margin-top:18px}
+.form{padding:16px 18px;display:none}
+.form.open{display:block}
+.form h3{font-size:15px;font-weight:600;margin-bottom:12px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.grid .full{grid-column:1/-1}
+@media (max-width:820px){.grid{grid-template-columns:1fr 1fr}.grid .full{grid-column:1/-1}}
+@media (max-width:480px){.grid{grid-template-columns:1fr}}
+.form:not(.usd) .usd-only{display:none}
+.form:not(.pending) .pend-only{display:none}
+.form:not(.newcat) .newcat-only{display:none}
+.form:not(.partly) .part-only{display:none}
+.pill{display:inline-block;font-family:var(--font-ui);font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.pill.paid{background:var(--good-soft);color:var(--good)}
+.pill.pending{background:var(--warn-soft);color:var(--warn)}
+.pill.partly{background:var(--blue-soft);color:var(--blue)}
+.pill.late{background:var(--bad-soft);color:var(--bad)}
+td.date small{display:block;color:var(--faint);font-size:12px;margin-top:3px;white-space:normal}
+.nav button .badge{background:var(--bad);color:#fff;font-family:var(--font-ui);font-size:11px;font-weight:600;padding:1px 7px;border-radius:999px}
+.notice{margin-top:14px;padding:10px 12px;border-radius:8px;font-size:13.5px;background:var(--blue-soft);color:var(--blue);border:1px solid color-mix(in srgb,var(--blue) 25%,transparent)}
+.notice[hidden]{display:none}
+.notice b{font-weight:700}
+.tiles{grid-template-columns:repeat(4,1fr)}
+@media (max-width:980px){.tiles{grid-template-columns:1fr 1fr}}
+label .hint{font-weight:400;font-size:11.5px;color:var(--faint);min-height:14px}
+label .hint.ok{color:var(--good)}
+label .hint.warn{color:var(--warn)}
+label input[readonly]{background:var(--surface-2);color:var(--muted)}
+label{display:grid;gap:4px;font-size:12.5px;color:var(--faint);font-family:var(--font-ui);font-weight:500;align-content:start}
+label input,label select,label textarea{background:var(--surface);border:1px solid var(--line-strong);border-radius:8px;padding:8px 10px;font-family:var(--font-body);font-size:14.5px;color:var(--text);width:100%;min-width:0}
+label input:not([type=date]),label select{height:38px}
+.amt-wrap{display:block}
+label textarea{resize:vertical;min-height:38px}
+.form-actions{display:flex;gap:8px;margin-top:12px;align-items:center;flex-wrap:wrap}
+.form-actions .err{color:var(--bad);font-size:13px}
+.amt-wrap{position:relative}
+.amt-wrap input{padding-left:24px}
+.amt-wrap::before{content:"₹";position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--faint);font-size:14px}
+.amt-wrap.usd::before{content:"$"}
+td.cat small{display:block;color:var(--faint);font-size:12.5px;margin-top:3px}
+td.notes small{display:block;color:var(--faint);font-size:12.5px;margin-top:3px}
+td.notes a{color:var(--blue);font-weight:600;text-decoration:none}
+td.notes a:hover{text-decoration:underline}
+td.amt small{display:block;font-weight:400;color:var(--faint);font-size:12px}
+
+/* table */
+.list-h{display:flex;align-items:baseline;gap:10px;padding:14px 18px 0;flex-wrap:wrap}
+.list-h h3{font-size:15px;font-weight:600}
+.list-h .c{color:var(--faint);font-size:13px;margin-left:auto}
+.tbl-wrap{overflow-x:auto;padding:8px 8px 4px}
+table{border-collapse:collapse;width:100%;min-width:640px}
+th{font-family:var(--font-ui);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);text-align:left;padding:8px 10px;border-bottom:1px solid var(--line-strong);white-space:nowrap}
+td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top;font-size:14.5px}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover{background:var(--surface-2)}
+td.r,th.r{text-align:right}
+td.date{white-space:nowrap;color:var(--muted)}
+td.vendor{font-weight:600}
+td.vendor small{display:block;font-weight:400;color:var(--faint);font-size:12.5px}
+td.cat span{display:inline-block;background:var(--blue-soft);color:var(--blue);font-family:var(--font-ui);font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:999px;white-space:nowrap}
+td.notes{color:var(--muted);max-width:320px}
+td.amt{font-weight:700;white-space:nowrap}
+td.act{white-space:nowrap;text-align:right}
+td.act button{background:none;border:none;cursor:pointer;color:var(--faint);padding:2px 6px;border-radius:6px;font-size:13px}
+td.act button:hover{background:var(--surface-2);color:var(--blue)}
+td.act button.del:hover{color:var(--bad)}
+tfoot td{font-weight:700;border-top:2px solid var(--line-strong);border-bottom:none;background:var(--surface-2)}
+.empty{padding:36px 18px;text-align:center;color:var(--faint)}
+.empty b{display:block;color:var(--text);font-family:var(--font-ui);font-weight:600;margin-bottom:4px}
+.month-row td{background:var(--surface-2);font-family:var(--font-ui);font-size:11.5px;font-weight:600;color:var(--faint);letter-spacing:.04em;text-transform:uppercase;padding:6px 10px}
+
+/* confirm */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;place-items:center;z-index:30;padding:16px}
+.modal.open{display:grid}
+.modal .box{background:var(--surface);border-radius:12px;padding:20px 22px;max-width:380px;width:100%;box-shadow:var(--shadow)}
+.modal h3{font-size:16px;font-weight:600;margin-bottom:6px}
+.modal p{margin:0 0 14px;color:var(--muted);font-size:14px}
+.modal .row{display:flex;gap:8px;justify-content:flex-end}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:9px 14px;border-radius:999px;font-size:13.5px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:40}
+.toast.on{opacity:1}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <aside class="side">
+    <div class="brand">
+      <div class="mark">BVC</div>
+      <div><h1>Spends Board</h1><p>Marketing expenses, live</p></div>
+    </div>
+    <div>
+      <div class="side-h">View</div>
+      <nav class="nav" id="periodNav">
+        <button data-p="month" class="on">This month <span class="amt" id="pMonth"></span></button>
+        <button data-p="fy">This financial year <span class="amt" id="pFY"></span></button>
+        <button data-p="all">All time <span class="amt" id="pAll"></span></button>
+        <button data-p="pending">Pending payments <span class="amt" id="pPending"></span></button>
+        <button data-p="renewals">Upcoming renewals <span class="amt" id="pRenew"></span></button>
+      </nav>
+    </div>
+    <div>
+      <div class="side-h">Categories</div>
+      <nav class="nav cats" id="catNav"></nav>
+    </div>
+    <div class="side-foot"><span class="dot" id="dot"></span><span id="connText">Connecting…</span></div>
+  </aside>
+
+  <main class="main">
+    <div class="head">
+      <div>
+        <h2 id="title">This month</h2>
+        <p id="subtitle"></p>
+      </div>
+      <div class="head-r">
+        <input class="search" type="search" id="q" placeholder="Search vendor, category, notes, approver" aria-label="Search expenses">
+        <button class="btn primary" id="addBtn">+ Add expense</button>
+      </div>
+    </div>
+    <div class="banner" id="banner" hidden></div>
+
+    <div class="notice" id="notice" hidden></div>
+
+    <section class="tiles">
+      <div class="tile"><div class="l">Spent in this view</div><div class="v num" id="tSpent">₹0</div><div class="s" id="tSpentS"></div></div>
+      <div class="tile"><div class="l">Still to pay</div><div class="v num" id="tOwed">₹0</div><div class="s" id="tOwedS"></div></div>
+      <div class="tile"><div class="l">Biggest category</div><div class="v txt" id="tCat">—</div><div class="s" id="tCatS"></div></div>
+      <div class="tile"><div class="l">Biggest vendor</div><div class="v txt" id="tVendor">—</div><div class="s" id="tVendorS"></div></div>
+    </section>
+
+    <section class="card">
+      <form class="form" id="form" autocomplete="off">
+        <h3 id="formTitle">Add an expense</h3>
+        <div class="grid">
+          <label>Date<input type="date" id="fDate" required></label>
+          <label>Vendor / paid to<input type="text" id="fVendor" list="vendors" placeholder="e.g. Indian Jeweller, Canva" required maxlength="80"></label>
+          <label>Category<select id="fCat" required></select></label>
+          <label class="newcat-only">New category name<input type="text" id="fCatNew" placeholder="Type the new category" maxlength="40"></label>
+          <label>Sub-category<input type="text" id="fSub" list="subs" placeholder="e.g. Stall branding" maxlength="40"></label>
+
+          <label>Currency<select id="fCur"><option value="INR">₹ INR</option><option value="USD">$ USD</option></select></label>
+          <label><span id="fAmtLbl">Amount</span><span class="amt-wrap" id="amtWrap"><input type="number" id="fAmt" min="0" step="0.01" inputmode="decimal" placeholder="0" required></span></label>
+          <label class="usd-only">Rate (₹ per $)<input type="number" id="fRate" min="0" step="0.0001" inputmode="decimal" placeholder="0.00"><small class="hint" id="rateHint"></small></label>
+          <label class="usd-only">Amount in ₹<input type="text" id="fInr" readonly value="₹0"></label>
+
+          <label>Payment status<select id="fStatus"><option value="Paid">Paid</option><option value="Pending">Pending</option><option value="Partly paid">Partly paid</option></select></label>
+          <label class="pend-only">Due date<input type="date" id="fDue"></label>
+          <label class="part-only">Paid so far (₹)<input type="number" id="fPaid" min="0" step="1" inputmode="numeric" placeholder="0"></label>
+          <label>Repeats<select id="fRecur"><option value="">Does not repeat</option><option value="monthly">Monthly</option><option value="quarterly">Quarterly</option><option value="yearly">Yearly</option></select></label>
+
+          <label>Invoice link<input type="url" id="fInv" placeholder="https://drive.google.com/…" maxlength="500"></label>
+          <label>Approved by<input type="text" id="fAppr" placeholder="Name" maxlength="60"></label>
+          <label>Added by<select id="fBy"><option value="">—</option><option>Nikita</option><option>Hanisha</option><option>Drashti</option></select></label>
+          <label class="full">Notes (optional)<textarea id="fNotes" rows="1" placeholder="Invoice no., what it was for, GST included or not…" maxlength="300"></textarea></label>
+        </div>
+        <datalist id="vendors"></datalist>
+        <datalist id="subs"></datalist>
+        <div class="form-actions">
+          <button class="btn primary" type="submit" id="saveBtn">Save expense</button>
+          <button class="btn" type="button" id="cancelBtn">Cancel</button>
+          <span class="err" id="formErr"></span>
+        </div>
+      </form>
+
+      <div class="list-h"><h3 id="listTitle">Expenses</h3><span class="c" id="listCount"></span></div>
+      <div class="tbl-wrap">
+        <table id="tbl">
+          <thead><tr><th>Date</th><th>Vendor</th><th>Category · Sub-category</th><th>Status</th><th>Notes · Invoice · Approval</th><th class="r">Amount (₹)</th><th></th></tr></thead>
+          <tbody></tbody>
+          <tfoot><tr><td colspan="5">Total</td><td class="r num" id="tfTotal"></td><td></td></tr></tfoot>
+        </table>
+        <div class="empty" id="empty" hidden><b>No expenses here yet</b>Use “Add expense” to log the first one.</div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+  <div class="box">
+    <h3 id="mTitle">Delete this expense?</h3>
+    <p id="mText"></p>
+    <div class="row"><button class="btn" id="mCancel">Keep it</button><button class="btn primary" id="mOk" style="background:var(--bad);border-color:var(--bad);color:#fff">Delete</button></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const inr = new Intl.NumberFormat('en-IN',{maximumFractionDigits:0});
+const money = v => '₹'+inr.format(Math.round(v||0));
+const short = v => v>=1e7 ? '₹'+(v/1e7).toFixed(2)+' Cr' : v>=1e5 ? '₹'+(v/1e5).toFixed(2)+' L' : money(v);
+const esc = s => String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const todayISO = () => { const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
+const fmtDate = iso => { const [y,m,d]=iso.split('-').map(Number); return new Date(y,m-1,d).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}); };
+const fmtMonth = iso => { const [y,m]=iso.split('-').map(Number); return new Date(y,m-1,1).toLocaleDateString('en-IN',{month:'long',year:'numeric'}); };
+const fyOf = iso => { const [y,m]=iso.split('-').map(Number); const s = m>=4 ? y : y-1; return s+'-'+String((s+1)%100).padStart(2,'0'); };
+const now = todayISO(); const curFY = fyOf(now); const curMonth = now.slice(0,7);
+const uid = () => 'e'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+
+/* ---------- state ---------- */
+let rows = [];            // {id,date,vendor,category,amount,notes,by,createdAt}
+let period = 'month', cat = '', q = '', editing = null;
+let store = null;         // {add,set,del} backed by db or localStorage
+let toDelete = null;
+
+/* ---------- storage ---------- */
+function localLoad(){ try{ return JSON.parse(localStorage.getItem('bvc-spends')||'[]'); }catch(e){ return []; } }
+function localSave(){ try{ localStorage.setItem('bvc-spends',JSON.stringify(rows)); }catch(e){} }
+const localStore = {
+  add: async d => { rows.push(d); localSave(); render(); },
+  set: async d => { rows = rows.map(r=>r.id===d.id?d:r); localSave(); render(); },
+  del: async id => { rows = rows.filter(r=>r.id!==id); localSave(); render(); },
+};
+function setConn(ok,text){ $('#dot').classList.toggle('off',!ok); $('#connText').textContent = text; }
+
+async function connect(){
+  let db = null;
+  try { db = window.claude && window.claude.use ? await window.claude.use('db') : null; } catch(e){ db = null; }
+  if(!db){
+    rows = localLoad(); store = localStore;
+    setConn(false,'Saved on this device only');
+    $('#banner').textContent = 'Not connected to the shared board. Expenses you add here are saved on this device only.';
+    $('#banner').hidden = false;
+    render(); return;
+  }
+  const col = db.collection('expenses');
+  store = {
+    add: async d => col.doc(d.id).set(d),
+    set: async d => col.doc(d.id).set(d),
+    del: async id => col.doc(id).delete(),
+  };
+  col.onSnapshot(snap => {
+    rows = snap.docs.filter(s=>s.exists).map(s=>({id:s.id,...s.data()}));
+    setConn(true, snap.metadata.fromCache ? 'Shared with the team · syncing' : 'Shared with the team · live');
+    render();
+  }, err => {
+    setConn(false,'Connection lost');
+    $('#banner').textContent = 'Lost the connection to the shared board. Reload the page to reconnect.';
+    $('#banner').hidden = false;
+  });
+}
+
+/* ---------- payments & renewals ---------- */
+const owed = r => r.status==='Pending' ? (+r.amount||0) : r.status==='Partly paid' ? Math.max(0,(+r.amount||0)-(+r.paid||0)) : 0;
+const isLate = r => owed(r)>0 && r.due && r.due<now;
+function addMonths(iso,n){ const [y,m,d]=iso.split('-').map(Number); const t=new Date(y,m-1+n,1); const last=new Date(t.getFullYear(),t.getMonth()+1,0).getDate(); t.setDate(Math.min(d,last)); return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0'); }
+function nextRenewal(r){
+  if(!r.recurs) return null;
+  const step = r.recurs==='monthly'?1:r.recurs==='quarterly'?3:12;
+  let d = r.date, guard=0; while(d<now && guard++<600) d = addMonths(d,step); return d;
+}
+const daysUntil = iso => Math.round((new Date(iso)-new Date(now))/86400000);
+const dueSoon = () => rows.map(r=>({r,next:nextRenewal(r)})).filter(x=>x.next && daysUntil(x.next)<=30).sort((a,b)=>a.next.localeCompare(b.next));
+
+/* ---------- filtering ---------- */
+function inPeriod(r){
+  if(period==='month') return r.date.slice(0,7)===curMonth;
+  if(period==='fy') return fyOf(r.date)===curFY;
+  if(period==='pending') return owed(r)>0;
+  if(period==='renewals') return !!r.recurs;
+  return true;
+}
+function visible(){
+  const s = q.toLowerCase();
+  const list = rows.filter(r => inPeriod(r) && (!cat || r.category===cat) && (!s || [r.vendor,r.category,r.sub,r.notes,r.by,r.approvedBy,r.status].join(' ').toLowerCase().includes(s)));
+  if(period==='renewals') return list.sort((a,b)=>nextRenewal(a).localeCompare(nextRenewal(b)));
+  if(period==='pending') return list.sort((a,b)=>(a.due||'9999').localeCompare(b.due||'9999') || b.date.localeCompare(a.date));
+  return list.sort((a,b)=> b.date.localeCompare(a.date) || (b.createdAt||'').localeCompare(a.createdAt||''));
+}
+const sumOf = arr => arr.reduce((a,r)=>a+(+r.amount||0),0);
+const sumOwed = arr => arr.reduce((a,r)=>a+owed(r),0);
+
+/* ---------- render ---------- */
+function render(){
+  const periodRows = rows.filter(inPeriod);
+  const list = visible();
+  // sidebar amounts
+  $('#pMonth').textContent = short(sumOf(rows.filter(r=>r.date.slice(0,7)===curMonth)));
+  $('#pFY').textContent = short(sumOf(rows.filter(r=>fyOf(r.date)===curFY)));
+  $('#pAll').textContent = short(sumOf(rows));
+  const pendingRows = rows.filter(r=>owed(r)>0); const lateN = pendingRows.filter(isLate).length;
+  $('#pPending').innerHTML = pendingRows.length ? (lateN?`<span class="badge">${lateN} late</span> `:'')+short(sumOwed(pendingRows)) : '—';
+  const soon = dueSoon();
+  $('#pRenew').innerHTML = soon.length ? `<span class="badge">${soon.length}</span>` : (rows.some(r=>r.recurs)?'':'—');
+  document.querySelectorAll('#periodNav button').forEach(b=>b.classList.toggle('on',b.dataset.p===period));
+  // renewal notice
+  if(soon.length){
+    $('#notice').innerHTML = `<b>${soon.length} renewal${soon.length>1?'s':''} due in the next 30 days:</b> ` + soon.slice(0,4).map(x=>`${esc(x.r.vendor)} on ${fmtDate(x.next)} (${money(x.r.amount)})`).join(' · ') + (soon.length>4?` · +${soon.length-4} more`:'');
+    $('#notice').hidden=false;
+  } else $('#notice').hidden=true;
+  // categories (for the current period)
+  const catMap = {};
+  periodRows.forEach(r=>{ catMap[r.category]=(catMap[r.category]||0)+(+r.amount||0); });
+  const cats = Object.entries(catMap).sort((a,b)=>b[1]-a[1]);
+  $('#catNav').innerHTML = `<button data-c="" class="${cat?'':'on'}">All categories <span class="amt">${cats.length}</span></button>` +
+    cats.map(([c,v])=>`<button data-c="${esc(c)}" class="${cat===c?'on':''}"><span>${esc(c)}</span><span class="amt">${short(v)}</span></button>`).join('');
+  if(cat && !catMap[cat]) { cat=''; }
+  // heading
+  const titles = {month: fmtMonth(now), fy: 'Financial year '+curFY, all: 'All expenses', pending: 'Pending payments', renewals: 'Upcoming renewals'};
+  const subs = {month:'Everything dated this month', fy:'April '+curFY.slice(0,4)+' to March '+(+curFY.slice(0,4)+1), all:'Every expense ever logged', pending:'Expenses not yet fully paid, soonest due date first', renewals:'Expenses that repeat, next renewal first'};
+  $('#title').textContent = titles[period] + (cat ? ' · '+cat : '');
+  $('#subtitle').textContent = subs[period];
+  // tiles
+  const spent = sumOf(list);
+  $('#tSpent').textContent = money(spent);
+  $('#tSpentS').textContent = list.length ? `${list.length} expense${list.length>1?'s':''}${q?' matching your search':''}` : 'Nothing logged yet';
+  const owedV = sumOwed(list); const lateRows = list.filter(isLate);
+  $('#tOwed').textContent = money(owedV);
+  $('#tOwedS').textContent = owedV ? `${list.filter(r=>owed(r)>0).length} unpaid${lateRows.length?` · ${lateRows.length} past due date`:''}` : 'All paid';
+  const byCat = {}; const byVen = {};
+  list.forEach(r=>{ byCat[r.category]=(byCat[r.category]||0)+(+r.amount||0); byVen[r.vendor]=(byVen[r.vendor]||0)+(+r.amount||0); });
+  const topC = Object.entries(byCat).sort((a,b)=>b[1]-a[1])[0]; const topV = Object.entries(byVen).sort((a,b)=>b[1]-a[1])[0];
+  $('#tCat').textContent = topC ? topC[0] : '—'; $('#tCatS').textContent = topC ? `${money(topC[1])} · ${Math.round(topC[1]/spent*100)}% of this view` : '';
+  $('#tVendor').textContent = topV ? topV[0] : '—'; $('#tVendorS').textContent = topV ? `${money(topV[1])} · ${Math.round(topV[1]/spent*100)}% of this view` : '';
+  // datalists
+  $('#vendors').innerHTML = [...new Set(rows.map(r=>r.vendor))].sort().map(v=>`<option value="${esc(v)}">`).join('');
+  $('#subs').innerHTML = [...new Set(rows.map(r=>r.sub).filter(Boolean))].sort().map(v=>`<option value="${esc(v)}">`).join('');
+  if(!$('#form').classList.contains('open')) fillCatOptions('');
+  // table
+  $('#listCount').textContent = list.length ? `${list.length} of ${periodRows.length} in this period` : '';
+  $('#empty').hidden = list.length>0;
+  $('#tbl').style.display = list.length ? '' : 'none';
+  let html = '', lastM = '';
+  list.forEach(r=>{
+    const m = r.date.slice(0,7);
+    if((period==='fy' || period==='all') && m!==lastM){ html += `<tr class="month-row"><td colspan="7">${fmtMonth(r.date)}</td></tr>`; lastM=m; }
+    const extras = [];
+    if(r.invoice) extras.push(`<a href="${esc(r.invoice)}" target="_blank" rel="noopener">Invoice ↗</a>`);
+    if(r.approvedBy) extras.push(`Approved by ${esc(r.approvedBy)}`);
+    const next = nextRenewal(r);
+    const st = r.status||'Paid'; const late = isLate(r);
+    const pill = late ? `<span class="pill late">Late</span>` : st==='Paid' ? `<span class="pill paid">Paid</span>` : st==='Pending' ? `<span class="pill pending">Pending</span>` : `<span class="pill partly">Partly paid</span>`;
+    const stSmall = st==='Paid' ? '' : `<small>${st==='Partly paid'?`${money(r.paid||0)} paid · ${money(owed(r))} left`:''}${r.due?`${st==='Partly paid'?'<br>':''}due ${fmtDate(r.due)}`:''}</small>`;
+    html += `<tr data-id="${esc(r.id)}">
+      <td class="date">${fmtDate(r.date)}${next?`<small>${r.recurs} · next ${fmtDate(next)}</small>`:''}</td>
+      <td class="vendor">${esc(r.vendor)}${r.by?`<small>added by ${esc(r.by)}</small>`:''}</td>
+      <td class="cat"><span>${esc(r.category)}</span>${r.sub?`<small>${esc(r.sub)}</small>`:''}</td>
+      <td class="cat">${pill}${stSmall}</td>
+      <td class="notes">${esc(r.notes)}${extras.length?`<small>${extras.join(' · ')}</small>`:''}</td>
+      <td class="amt r num">${money(r.amount)}${r.currency==='USD'?`<small>$${inr.format(r.amountOriginal)} @ ₹${r.rate}</small>`:''}</td>
+      <td class="act"><button class="edit" title="Edit">Edit</button><button class="del" title="Delete">Delete</button></td>
+    </tr>`;
+  });
+  $('#tbl tbody').innerHTML = html;
+  $('#tfTotal').textContent = money(spent);
+}
+
+/* ---------- events ---------- */
+$('#periodNav').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; period=b.dataset.p; render(); });
+$('#catNav').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; cat=b.dataset.c; render(); });
+$('#q').addEventListener('input',e=>{ q=e.target.value.trim(); render(); });
+
+/* ---------- categories ---------- */
+const BASE_CATS = ['Exhibition','Software','PR','Magazines','Digital Media Promotions','Calendar','Internal Gifting','External Gifting'];
+function fillCatOptions(selected){
+  const extra = [...new Set(rows.map(r=>r.category).filter(c=>c && !BASE_CATS.includes(c)))].sort();
+  const all = [...BASE_CATS, ...extra];
+  if(selected && selected!=='__new' && !all.includes(selected)) all.push(selected);
+  $('#fCat').innerHTML = '<option value="">Select a category</option>' + all.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('') + '<option value="__new">+ Add new category</option>';
+  $('#fCat').value = selected||'';
+}
+function setCatUI(){ const isNew = $('#fCat').value==='__new'; $('#form').classList.toggle('newcat',isNew); if(isNew) $('#fCatNew').focus(); }
+$('#fCat').addEventListener('change',setCatUI);
+
+/* ---------- currency ---------- */
+const lastRate = () => { try{ return +localStorage.getItem('bvc-spends-rate')||0; }catch(e){ return 0; } };
+function setCurrencyUI(){
+  const usd = $('#fCur').value==='USD';
+  $('#form').classList.toggle('usd',usd);
+  $('#amtWrap').classList.toggle('usd',usd);
+  $('#fAmtLbl').textContent = usd ? 'Amount in $' : 'Amount';
+  updateInr();
+}
+function updateInr(){
+  const usd = $('#fCur').value==='USD';
+  const a = +$('#fAmt').value||0, rate = +$('#fRate').value||0;
+  $('#fInr').value = usd ? money(a*rate) : money(a);
+}
+let rateReq = 0;
+async function fetchRate(){
+  if($('#fCur').value!=='USD') return;
+  const date = $('#fDate').value; if(!date) return;
+  const hint = $('#rateHint'); const my = ++rateReq;
+  hint.className='hint'; hint.textContent='Looking up the rate for '+fmtDate(date)+'…';
+  const ctrl = new AbortController(); const t = setTimeout(()=>ctrl.abort(),6000);
+  try{
+    const res = await fetch('https://api.frankfurter.dev/v1/'+date+'?base=USD&symbols=INR',{signal:ctrl.signal});
+    const j = await res.json();
+    if(my!==rateReq) return;
+    const rate = j && j.rates && j.rates.INR;
+    if(!rate) throw new Error('no rate');
+    $('#fRate').value = (+rate).toFixed(4);
+    hint.className='hint ok'; hint.textContent='ECB reference rate for '+fmtDate(j.date)+(j.date!==date?' (nearest working day)':'');
+    updateInr();
+  }catch(e){
+    if(my!==rateReq) return;
+    const lr = lastRate();
+    if(!$('#fRate').value && lr) $('#fRate').value = lr;
+    hint.className='hint warn'; hint.textContent = 'Could not fetch a rate here. Enter the rate from the bank statement'+(lr?' (last used ₹'+lr+')':'')+'.';
+    updateInr();
+  }finally{ clearTimeout(t); }
+}
+$('#fCur').addEventListener('change',()=>{ setCurrencyUI(); if($('#fCur').value==='USD' && !editing) fetchRate(); });
+function setStatusUI(){ const s=$('#fStatus').value; $('#form').classList.toggle('pending',s!=='Paid'); $('#form').classList.toggle('partly',s==='Partly paid'); }
+$('#fStatus').addEventListener('change',setStatusUI);
+$('#fDate').addEventListener('change',()=>{ if($('#fCur').value==='USD') fetchRate(); });
+$('#fAmt').addEventListener('input',updateInr);
+$('#fRate').addEventListener('input',()=>{ $('#rateHint').className='hint'; $('#rateHint').textContent='Rate entered manually'; updateInr(); });
+
+function openForm(r){
+  editing = r||null;
+  $('#formTitle').textContent = r ? 'Edit expense' : 'Add an expense';
+  $('#saveBtn').textContent = r ? 'Save changes' : 'Save expense';
+  $('#fDate').value = r ? r.date : now;
+  $('#fVendor').value = r ? r.vendor : '';
+  fillCatOptions(r ? r.category : (cat||''));
+  $('#fCatNew').value = '';
+  setCatUI();
+  $('#fSub').value = r ? (r.sub||'') : '';
+  $('#fCur').value = r ? (r.currency||'INR') : 'INR';
+  $('#fAmt').value = r ? (r.currency==='USD' ? r.amountOriginal : r.amount) : '';
+  $('#fRate').value = r && r.currency==='USD' ? r.rate : '';
+  $('#rateHint').className='hint'; $('#rateHint').textContent='';
+  $('#fStatus').value = r ? (r.status||'Paid') : 'Paid';
+  $('#fDue').value = r ? (r.due||'') : '';
+  $('#fPaid').value = r && r.paid!=null ? r.paid : '';
+  $('#fRecur').value = r ? (r.recurs||'') : '';
+  setStatusUI();
+  $('#fInv').value = r ? (r.invoice||'') : '';
+  $('#fAppr').value = r ? (r.approvedBy||'') : '';
+  $('#fNotes').value = r ? (r.notes||'') : '';
+  let by=''; try{ by = localStorage.getItem('bvc-spends-by')||''; }catch(e){}
+  $('#fBy').value = r ? (r.by||'') : by;
+  $('#formErr').textContent='';
+  setCurrencyUI();
+  $('#form').classList.add('open');
+  $('#form').scrollIntoView({block:'nearest'});
+  $('#fVendor').focus();
+}
+function closeForm(){ $('#form').classList.remove('open'); editing=null; rateReq++; }
+$('#addBtn').addEventListener('click',()=>openForm(null));
+$('#cancelBtn').addEventListener('click',closeForm);
+$('#form').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const usd = $('#fCur').value==='USD';
+  const entered = +$('#fAmt').value, rate = +$('#fRate').value;
+  const inv = $('#fInv').value.trim();
+  const d = {
+    id: editing ? editing.id : uid(),
+    date: $('#fDate').value, vendor: $('#fVendor').value.trim(), category: ($('#fCat').value==='__new' ? $('#fCatNew').value : $('#fCat').value).trim(), sub: $('#fSub').value.trim(),
+    currency: usd ? 'USD' : 'INR',
+    amountOriginal: usd ? Math.round(entered*100)/100 : Math.round(entered),
+    rate: usd ? Math.round(rate*10000)/10000 : 1,
+    amount: usd ? Math.round(entered*rate) : Math.round(entered),
+    status: $('#fStatus').value,
+    due: $('#fStatus').value==='Paid' ? '' : $('#fDue').value,
+    paid: $('#fStatus').value==='Partly paid' ? Math.round(+$('#fPaid').value||0) : null,
+    recurs: $('#fRecur').value,
+    invoice: inv, approvedBy: $('#fAppr').value.trim(),
+    notes: $('#fNotes').value.trim(), by: $('#fBy').value.trim(),
+    createdAt: editing ? (editing.createdAt||new Date().toISOString()) : new Date().toISOString(),
+  };
+  if(!d.date||!d.vendor||!d.category||!(entered>=0)){ $('#formErr').textContent = $('#fCat').value==='__new' && !d.category ? 'Type a name for the new category.' : 'Date, vendor, category and amount are needed.'; return; }
+  if(usd && !(rate>0)){ $('#formErr').textContent='Enter the ₹ per $ rate so the amount can be converted.'; return; }
+  if(inv && !/^https?:\/\//i.test(inv)){ $('#formErr').textContent='The invoice link should start with http:// or https://'; return; }
+  if(d.status==='Partly paid' && d.paid>d.amount){ $('#formErr').textContent='Paid so far cannot be more than the amount.'; return; }
+  try{ localStorage.setItem('bvc-spends-by',d.by); if(usd) localStorage.setItem('bvc-spends-rate',String(d.rate)); }catch(err){}
+  $('#saveBtn').disabled = true;
+  try{
+    if(editing) await store.set(d); else await store.add(d);
+    toast(editing ? 'Saved' : 'Expense added');
+    closeForm();
+  }catch(err){
+    $('#formErr').textContent = err && err.code==='quota_exceeded' ? 'The board is full. Delete old entries to add more.' : 'Could not save. Check the connection and try again.';
+  }
+  $('#saveBtn').disabled = false;
+});
+$('#tbl').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b) return;
+  const id=b.closest('tr').dataset.id; const r=rows.find(x=>x.id===id); if(!r) return;
+  if(b.classList.contains('edit')) openForm(r);
+  else { toDelete=r; $('#mText').textContent=`${r.vendor} · ${money(r.amount)} on ${fmtDate(r.date)}`; $('#modal').classList.add('open'); $('#mCancel').focus(); }
+});
+$('#mCancel').addEventListener('click',()=>{ $('#modal').classList.remove('open'); toDelete=null; });
+$('#modal').addEventListener('click',e=>{ if(e.target===$('#modal')) { $('#modal').classList.remove('open'); toDelete=null; } });
+$('#mOk').addEventListener('click',async()=>{
+  if(!toDelete) return; const r=toDelete; toDelete=null; $('#modal').classList.remove('open');
+  try{ await store.del(r.id); toast('Deleted'); }catch(err){ toast('Could not delete. Try again.'); }
+});
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ $('#modal').classList.remove('open'); if($('#form').classList.contains('open')) closeForm(); } });
+let toastT; function toast(t){ $('#toast').textContent=t; $('#toast').classList.add('on'); clearTimeout(toastT); toastT=setTimeout(()=>$('#toast').classList.remove('on'),1800); }
+
+render();
+connect();
+</script>
+
+
+</body>
+</html>
