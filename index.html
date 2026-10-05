@@ -88,6 +88,7 @@ td.cat small{white-space:nowrap}
 .btn:disabled{opacity:.5;cursor:default}
 .banner{margin-top:14px;padding:9px 12px;border-radius:8px;font-size:13.5px;background:var(--warn-soft);color:var(--warn);border:1px solid color-mix(in srgb,var(--warn) 30%,transparent)}
 .banner[hidden]{display:none}
+.banner .btn{margin-left:8px;color:var(--text)}
 
 .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}
 @media (max-width:640px){.tiles{grid-template-columns:1fr}}
@@ -314,9 +315,59 @@ const localStore = {
 };
 function setConn(ok,text){ $('#dot').classList.toggle('off',!ok); $('#connText').textContent = text; }
 
+/* Shared board on Netlify: netlify/functions/expenses.mjs */
+const API = '/api/expenses';
+let writes = 0;           // bumped on every save/delete so a slower refresh can't undo it
+async function api(path,opts={}){
+  const res = await fetch(API+path,{cache:'no-store',...opts,headers:{'content-type':'application/json'}});
+  if(!res.ok) throw new Error('HTTP '+res.status);
+  return res.json();
+}
+async function pull(){
+  const my = writes;
+  try{
+    const data = await api('');
+    if(my!==writes) return;
+    rows = data; setConn(true,'Shared with the team · live'); render(); offerLocalMove();
+  }catch(e){ setConn(false,'Connection lost · retrying'); }
+}
+function offerLocalMove(){
+  const ids = new Set(rows.map(r=>r.id));
+  const local = localLoad();
+  const mine = local.filter(r=>r && r.id && !ids.has(r.id));
+  if(!mine.length){ if(local.length) try{ localStorage.removeItem('bvc-spends'); }catch(e){} $('#banner').hidden = true; return; }
+  $('#banner').innerHTML = `${mine.length} expense${mine.length>1?'s are':' is'} saved only on this device. <button class="btn sm" id="moveBtn" type="button">Add to the shared board</button>`;
+  $('#banner').hidden = false;
+}
+$('#banner').addEventListener('click',async e=>{
+  if(!e.target.closest('#moveBtn')) return;
+  const ids = new Set(rows.map(r=>r.id));
+  const mine = localLoad().filter(r=>r && r.id && !ids.has(r.id));
+  e.target.disabled = true;
+  try{
+    for(const r of mine) await store.add(r);
+    try{ localStorage.removeItem('bvc-spends'); }catch(err){}
+    $('#banner').hidden = true; toast(`${mine.length} added to the shared board`);
+  }catch(err){ e.target.disabled = false; toast('Could not move them. Try again.'); }
+});
+async function connectApi(){
+  try{ rows = await api(''); }catch(e){ return false; }
+  const put = async d => { writes++; await api('/'+encodeURIComponent(d.id),{method:'PUT',body:JSON.stringify(d)}); rows = rows.filter(r=>r.id!==d.id).concat(d); render(); };
+  store = {
+    add: put, set: put,
+    del: async id => { writes++; await api('/'+encodeURIComponent(id),{method:'DELETE'}); rows = rows.filter(r=>r.id!==id); render(); },
+  };
+  setConn(true,'Shared with the team · live');
+  render(); offerLocalMove();
+  setInterval(()=>{ if(!document.hidden) pull(); },15000);
+  document.addEventListener('visibilitychange',()=>{ if(!document.hidden) pull(); });
+  return true;
+}
+
 async function connect(){
   let db = null;
   try { db = window.claude && window.claude.use ? await window.claude.use('db') : null; } catch(e){ db = null; }
+  if(!db && await connectApi()) return;
   if(!db){
     rows = localLoad(); store = localStore;
     setConn(false,'Saved on this device only');
