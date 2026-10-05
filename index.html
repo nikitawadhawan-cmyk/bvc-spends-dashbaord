@@ -9,34 +9,15 @@
 <style>
 :root{
   color-scheme:light;
-  --bg:#F4F5F8; --surface:#FFFFFF; --surface-2:#F4F5F8; --line:#DDE0E8; --line-strong:#BFC4D2;
+  /* Same palette as the BVC Marketing Desk: white page, black text, light theme only */
+  --bg:#FFFFFF; --surface:#FFFFFF; --surface-2:#F4F5F8; --line:#DDE0E8; --line-strong:#BFC4D2;
   --text:#000000; --muted:#3D4454; --faint:#6E7587;
   --blue:#1B3F9B; --blue-ink:#FFFFFF; --blue-soft:#E7EDFB;
-  --gold:#C9A227; --gold-soft:#FBF3D9;
+  --gold:#C9A227; --gold-ink:#1F1800; --gold-soft:#FBF3D9;
   --good:#1E8E5A; --good-soft:#DFF3E8; --bad:#C6423E; --bad-soft:#FBE4E3; --warn-soft:#FFF1D6; --warn:#8A5A00;
   --font-ui:"Poppins","Segoe UI",system-ui,sans-serif;
   --font-body:"Source Sans 3","Segoe UI",system-ui,sans-serif;
   --radius:10px; --shadow:0 10px 30px rgba(0,0,0,.14);
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    color-scheme:dark;
-    --bg:#0F1424; --surface:#171D30; --surface-2:#1F2640; --line:#2B3350; --line-strong:#3C4566;
-    --text:#F2F4F8; --muted:#C3C8D6; --faint:#8E96AC;
-    --blue:#5F80E0; --blue-ink:#0B1020; --blue-soft:#1E2A52;
-    --gold:#D9B23A; --gold-soft:#3A2F0E;
-    --good:#3FBF86; --good-soft:#12352A; --bad:#E66767; --bad-soft:#3F1C1C; --warn-soft:#3A2B10; --warn:#E0A03A;
-    --shadow:0 10px 30px rgba(0,0,0,.5);
-  }
-}
-:root[data-theme="dark"]{
-  color-scheme:dark;
-  --bg:#0F1424; --surface:#171D30; --surface-2:#1F2640; --line:#2B3350; --line-strong:#3C4566;
-  --text:#F2F4F8; --muted:#C3C8D6; --faint:#8E96AC;
-  --blue:#5F80E0; --blue-ink:#0B1020; --blue-soft:#1E2A52;
-  --gold:#D9B23A; --gold-soft:#3A2F0E;
-  --good:#3FBF86; --good-soft:#12352A; --bad:#E66767; --bad-soft:#3F1C1C; --warn-soft:#3A2B10; --warn:#E0A03A;
-  --shadow:0 10px 30px rgba(0,0,0,.5);
 }
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
@@ -92,14 +73,14 @@ td.cat small{white-space:nowrap}
 
 .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}
 @media (max-width:640px){.tiles{grid-template-columns:1fr}}
-.tile{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
+.tile{background:var(--surface);border:1px solid var(--line-strong);border-radius:var(--radius);padding:14px 16px}
 .tile .l{font-family:var(--font-ui);font-size:12px;color:var(--faint);font-weight:500}
 .tile .v{font-family:var(--font-ui);font-size:26px;font-weight:600;margin-top:2px;line-height:1.1}
 .tile .v.txt{font-size:19px;line-height:1.2;overflow-wrap:anywhere}
 .tile .s{font-size:12.5px;color:var(--faint);margin-top:4px}
 
 /* form */
-.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);margin-top:18px}
+.card{background:var(--surface);border:1px solid var(--line-strong);border-radius:var(--radius);margin-top:18px}
 .form{padding:16px 18px;display:none}
 .form.open{display:block}
 .form h3{font-size:15px;font-weight:600;margin-bottom:12px}
@@ -150,7 +131,7 @@ td.amt small{display:block;font-weight:400;color:var(--faint);font-size:12px}
 .list-h .c{color:var(--faint);font-size:13px;margin-left:auto}
 .tbl-wrap{overflow-x:auto;padding:8px 8px 4px}
 table{border-collapse:collapse;width:100%;min-width:640px}
-th{font-family:var(--font-ui);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);text-align:left;padding:8px 10px;border-bottom:1px solid var(--line-strong);white-space:nowrap}
+th{font-family:var(--font-ui);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);background:var(--surface-2);font-weight:500;white-space:nowrap}
 td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top;font-size:14.5px}
 tbody tr:last-child td{border-bottom:none}
 tbody tr:hover{background:var(--surface-2)}
